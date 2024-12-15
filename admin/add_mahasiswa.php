@@ -12,7 +12,7 @@ include('validasi_mahasiswa.php'); // Memasukkan file validasi
 $error_message = '';
 
 // Menyimpan data yang dikirimkan dari form untuk mempertahankan inputan
-$nim = $nama = $tanggal_lahir = $alamat = $jenis_kelamin = $email = $no_telepon = $angkatan = '';
+$nim = $nama = $tanggal_lahir = $alamat = $jenis_kelamin = $email = $no_telepon = $angkatan = $program_studi = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nim = $_POST['nim'];
@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $no_telepon = $_POST['no_telepon'];
     $angkatan = $_POST['angkatan'];
+    $program_studi = $_POST['program_studi'];  // Mendapatkan nilai program_studi dari form
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
     // Validasi NIM
@@ -43,25 +44,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "Nomor telepon tidak valid! Pastikan nomor telepon terdiri dari 10-13 digit dan diawali dengan 081, 082, 083, 085, 087, 089 atau +6281, +6282, +6283, +6285, +6287, +6289.";
     } 
     else {
-        // Menambahkan data pengguna ke tabel users
-        $insert_user_sql = "INSERT INTO users (username, password, role) VALUES ('$nim', '$password', 'mahasiswa')";
-        if ($conn->query($insert_user_sql) === TRUE) {
-            // Ambil id_user dari user yang baru saja dimasukkan
-            $id_user = $conn->insert_id;
+        // Cek apakah NIM sudah terdaftar
+        $check_nim_sql = "SELECT * FROM users WHERE username = '$nim'";
+        $result = $conn->query($check_nim_sql);
 
-            // Menambahkan data mahasiswa
-            $sql = "INSERT INTO Mahasiswa (nim, nama, tanggal_lahir, alamat, jenis_kelamin, email, no_telepon, angkatan, id_user) 
-                    VALUES ('$nim', '$nama', '$tanggal_lahir', '$alamat', '$jenis_kelamin', '$email', '$no_telepon', '$angkatan', '$id_user')";
+        if ($result->num_rows > 0) {
+            // Jika NIM sudah ada, tampilkan pesan error
+            echo "NIM sudah terdaftar. Silakan gunakan NIM yang berbeda.";
+        } else {
+            // Menambahkan data pengguna ke tabel users
+            $insert_user_sql = "INSERT INTO users (username, password, role) VALUES ('$nim', '$password', 'mahasiswa')";
+            if ($conn->query($insert_user_sql) === TRUE) {
+                // Ambil id_user dari user yang baru saja dimasukkan
+                $id_user = $conn->insert_id;
 
-            if ($conn->query($sql) === TRUE) {
-                // Redirect ke halaman manage_mahasiswa.php setelah data berhasil ditambahkan
-                header("Location: manage_mahasiswa.php");
-                exit; // Pastikan untuk menghentikan eksekusi script setelah redirect
+                // Menambahkan data mahasiswa
+                $sql = "INSERT INTO Mahasiswa (nim, nama, tanggal_lahir, alamat, jenis_kelamin, email, no_telepon, angkatan, id_prodi, id_user) 
+                        VALUES ('$nim', '$nama', '$tanggal_lahir', '$alamat', '$jenis_kelamin', '$email', '$no_telepon', '$angkatan', '$program_studi', '$id_user')";
+
+                if ($conn->query($sql) === TRUE) {
+                    // Redirect ke halaman manage_mahasiswa.php setelah data berhasil ditambahkan
+                    header("Location: manage_mahasiswa.php");
+                    exit; // Pastikan untuk menghentikan eksekusi script setelah redirect
+                } else {
+                    echo "Error: " . $conn->error;
+                }
             } else {
                 echo "Error: " . $conn->error;
             }
-        } else {
-            echo "Error: " . $conn->error;
         }
     }
 }
@@ -140,6 +150,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <input type="email" name="email" placeholder="Email" value="<?php echo $email; ?>" required>
         <input type="text" name="no_telepon" placeholder="No Telepon" value="<?php echo $no_telepon; ?>" required>
         <input type="number" name="angkatan" placeholder="Angkatan" value="<?php echo $angkatan; ?>" required>
+        <select name="program_studi" required>
+            <?php
+            $prodi_sql = "SELECT * FROM ProgramStudi";
+            $prodi_result = $conn->query($prodi_sql);
+            while ($prodi = $prodi_result->fetch_assoc()) {
+                echo "<option value='{$prodi['id_prodi']}'>{$prodi['nama_prodi']}</option>";
+            }
+            ?>
+        </select>
         <input type="password" name="password" placeholder="Password" required>
         <button type="submit">Tambah Mahasiswa</button>
     </form>
