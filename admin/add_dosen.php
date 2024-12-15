@@ -6,6 +6,18 @@ if (!isset($_SESSION['id_user'])) {
 }
 
 include('../koneksi.php');
+include('validasi_dosen.php'); // Sertakan file validasi_dosen.php
+
+$error_message = "";
+
+// Default values untuk input form
+$nip_value = '';
+$nama_value = '';
+$email_value = '';
+$no_telepon_value = '';
+$alamat_value = '';
+$jabatan_value = '';
+$password_value = '';
 
 // Mengecek apakah form disubmit
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -16,52 +28,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $no_telepon = $_POST['no_telepon'];
     $alamat = $_POST['alamat'];
     $jabatan = $_POST['jabatan'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = $_POST['password'];
 
-    // Mengecek apakah NIP sudah ada
-    $sql_check_nip = "SELECT * FROM Dosen WHERE nip = '$nip'";
-    $result_nip = $conn->query($sql_check_nip);
-    if ($result_nip->num_rows > 0) {
-        echo "NIP sudah terdaftar, silakan masukkan NIP yang berbeda.";
-        exit;
+    // Simpan data input untuk dipertahankan jika validasi gagal
+    $nip_value = $nip;
+    $nama_value = $nama;
+    $email_value = $email;
+    $no_telepon_value = $no_telepon;
+    $alamat_value = $alamat;
+    $jabatan_value = $jabatan;
+    $password_value = $password;
+
+    // Validasi Nama
+    if ($validasi_nama = validasiNama($nama)) {
+        $error_message = $validasi_nama;
     }
 
-    // Mengecek apakah email sudah ada
-    $sql_check_email = "SELECT * FROM Dosen WHERE email = '$email'";
-    $result_email = $conn->query($sql_check_email);
-    if ($result_email->num_rows > 0) {
-        echo "Email sudah terdaftar, silakan masukkan email yang berbeda.";
-        exit;
+    // Validasi NIP
+    if ($validasi_nip = validasiNIP($nip)) {
+        $error_message = $validasi_nip;
     }
 
-    // Mengecek apakah no telepon sudah ada
-    $sql_check_telepon = "SELECT * FROM Dosen WHERE no_telepon = '$no_telepon'";
-    $result_telepon = $conn->query($sql_check_telepon);
-    if ($result_telepon->num_rows > 0) {
-        echo "No telepon sudah terdaftar, silakan masukkan no telepon yang berbeda.";
-        exit;
+    // Validasi Email
+    if ($validasi_email = validasiEmail($email)) {
+        $error_message = $validasi_email;
     }
 
-    // Proses menambahkan data ke tabel users
-    $sql_user = "INSERT INTO Users (username, PASSWORD, role) VALUES ('$nip', '$password', 'dosen')";
-    
-    if ($conn->query($sql_user) === TRUE) {
-        // Ambil id_user yang baru saja ditambahkan
-        $id_user = $conn->insert_id;
+    // Validasi No Telepon
+    if ($validasi_telepon = validasiNoTelepon($no_telepon)) {
+        $error_message = $validasi_telepon;
+    }
 
-        // Proses menambahkan data ke tabel Dosen
-        $sql_dosen = "INSERT INTO Dosen (nip, nama, email, no_telepon, alamat, jabatan, id_user)
-                      VALUES ('$nip', '$nama', '$email', '$no_telepon', '$alamat', '$jabatan', '$id_user')";
+    // Validasi Password
+    if ($validasi_password = validasiPassword($password)) {
+        $error_message = $validasi_password;
+    }
 
-        if ($conn->query($sql_dosen) === TRUE) {
-            // Redirect ke halaman manage_dosen.php setelah data dosen ditambahkan
-            header("Location: manage_dosen.php");
-            exit;
+    // Validasi cek NIP, email, dan no telepon di database
+    if ($validasi_data = cekDataTersedia($conn, $nip, $email, $no_telepon)) {
+        $error_message = $validasi_data;
+    }
+
+    if (empty($error_message)) {
+        // Proses menambahkan data ke tabel users
+        $sql_user = "INSERT INTO Users (username, PASSWORD, role) VALUES ('$nip', '" . password_hash($password, PASSWORD_DEFAULT) . "', 'dosen')";
+        
+        if ($conn->query($sql_user) === TRUE) {
+            // Ambil id_user yang baru saja ditambahkan
+            $id_user = $conn->insert_id;
+
+            // Proses menambahkan data ke tabel Dosen
+            $sql_dosen = "INSERT INTO Dosen (nip, nama, email, no_telepon, alamat, jabatan, id_user)
+                          VALUES ('$nip', '$nama', '$email', '$no_telepon', '$alamat', '$jabatan', '$id_user')";
+
+            if ($conn->query($sql_dosen) === TRUE) {
+                // Redirect ke halaman manage_dosen.php setelah data dosen ditambahkan
+                header("Location: manage_dosen.php");
+                exit;
+            } else {
+                $error_message = "Error: " . $conn->error;
+            }
         } else {
-            echo "Error: " . $conn->error;
+            $error_message = "Error: " . $conn->error;
         }
-    } else {
-        echo "Error: " . $conn->error;
     }
 }
 ?>
@@ -140,6 +169,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .form-container label {
             font-weight: bold;
         }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -147,29 +182,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <h1>Tambah Dosen</h1>
 
 <div class="form-container">
+    <!-- Menampilkan pesan error jika ada -->
+    <?php if (!empty($error_message)): ?>
+        <div class="error-message"><?php echo $error_message; ?></div>
+    <?php endif; ?>
+
     <form method="POST" action="add_dosen.php">
         <label for="nip">NIP</label>
-        <input type="text" name="nip" required>
+        <input type="text" name="nip" value="<?php echo htmlspecialchars($nip_value); ?>" required>
         
         <label for="nama">Nama</label>
-        <input type="text" name="nama" required>
+        <input type="text" name="nama" value="<?php echo htmlspecialchars($nama_value); ?>" required>
         
         <label for="email">Email</label>
-        <input type="email" name="email" required>
+        <input type="email" name="email" value="<?php echo htmlspecialchars($email_value); ?>" required>
         
         <label for="no_telepon">No Telepon</label>
-        <input type="text" name="no_telepon" required>
+        <input type="text" name="no_telepon" value="<?php echo htmlspecialchars($no_telepon_value); ?>" required>
         
         <label for="alamat">Alamat</label>
-        <textarea name="alamat" rows="4" required></textarea>
+        <textarea name="alamat" rows="4"><?php echo htmlspecialchars($alamat_value); ?></textarea>
         
         <label for="jabatan">Jabatan</label>
-        <input type="text" name="jabatan" required>
+        <input type="text" name="jabatan" value="<?php echo htmlspecialchars($jabatan_value); ?>" required>
         
         <label for="password">Password</label>
-        <input type="password" name="password" required>
+        <input type="password" name="password" value="<?php echo htmlspecialchars($password_value); ?>" required>
         
-        <button type="submit">Tambah Dosen</button>
+        <button type="submit">Simpan</button>
     </form>
 </div>
 
