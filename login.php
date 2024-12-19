@@ -75,9 +75,14 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Login</title>
 </head>
 <body>
+    <header>
+        <h1>Sistem Informasi Akademik</h1>
+    </header>
+    <div  class="box">
     <h2>Login</h2>
     <form method="POST" action="">
         <label for="username">Username/NIM/NIP:</label><br>
@@ -88,7 +93,13 @@ $conn->close();
 
         <button type="submit">Login</button>
     </form>
+    </div>
 
     <?php if (!empty($error)) { echo "<p style='color: red;'>$error</p>"; } ?>
+
+    <footer>
+        <p>&copy; 2024 Sistem Informasi Akademik. All Rights Reserved.</p>
+    </footer>
 </body>
 </html>
+
