@@ -1,5 +1,7 @@
 body {
-    background-color: #4793AF;
+    background-image: url('https://i.pinimg.com/736x/d0/2e/cd/d02ecdb9d7c07b97b4d64cd4174dc6f4.jpg ');
+    background-size: cover; /* Menyesuaikan gambar dengan ukuran layar */
+    background-position: center; /* Memastikan gambar berada di tengah */
     color: white;
     font-family: sans-serif;
     display: flex;
@@ -13,26 +15,26 @@ body {
     overflow: hidden; /* Menonaktifkan scroll */
 }
 
+
 header {
     text-align: center;
     font-size: 25px;
     font-weight: bold;
     color: #fff;
     padding: 10px 0;
-    background-color: #2c3e50;
+    background: linear-gradient(to right, #2c3e50, #3498db);
     width: 100%;
     box-sizing: border-box;
     position: sticky;
     top: 0;
-    margin-top: -30px;
+    margin-top: -20px;
     z-index: 1000;
 }
-
 footer {
     text-align: center;
     font-size: 16px;
     color: #fff;
-    background-color: #2c3e50;
+    background: linear-gradient(to right, #add8e6, #00008b); /* Biru muda ke biru tua */
     width: 100%;
     padding: 15px 0;
     position: sticky;
@@ -77,7 +79,7 @@ input[type="password"] {
 }
 
 button[type="submit"] {
-    background-color: #4CAF50;
+    background: linear-gradient(to right, #2c3e50, #3498db);
     color: white;
     padding: 12px 20px;
     border: none;
@@ -87,7 +89,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #45a049;
+    background: linear-gradient(to right, #3498db, #2c3e50);
 }
 
 p {
@@ -97,4 +99,60 @@ p {
 
 .box {
     margin-top: 200px;
+}
+
+
+
+nav {
+    margin-top: 190px;
+    margin-left: 160px;
+    background-color: rgba(255, 255, 255, 0.2); /* Warna putih dengan 80% opasitas */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 20px;
+    height: 600px;
+    width: 80%;
+    backdrop-filter: blur(10px); /* Efek blur pada elemen di belakang */
+    -webkit-backdrop-filter: blur(10px); /* Mendukung browser berbasis WebKit */
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Menyusun elemen dengan lebih rapi */
+    gap: 15px; /* Jarak antar elemen */
+}
+
+nav ul li {
+    flex: 1 1 calc(25% - 30px); /* Ukuran menyesuaikan dengan fleksibilitas */
+    width:400px ; 
+    height: 250px; 
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transisi untuk efek mulus */
+}
+
+nav ul li a {
+    display: flex; /* Gunakan flexbox untuk tata letak */
+    align-items: center; /* Tengahkan konten secara vertikal */
+    justify-content: center; /* Tengahkan konten secara horizontal */
+    padding: 12px 24px; /* Tambahkan sedikit lebar dan tinggi untuk kenyamanan */
+    background: linear-gradient(to right, #b0bec5, #add8e6); /* Gradasi abu-abu ke biru muda */
+    color: white; /* Warna teks putih */
+    text-decoration: none; /* Hapus garis bawah */
+    font-weight: bold; /* Buat teks lebih tebal */
+    border-radius: 8px; /* Sudut melengkung lebih lembut */
+    transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Transisi untuk interaksi */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Tambahkan bayangan untuk efek mengambang */
+    font-size: 16px; /* Ukuran font lebih jelas */
+    margin: 10px; /* Tambahkan margin untuk spasi antar elemen */
+}
+
+nav ul li a:hover {
+    background: linear-gradient(to right, #90a4ae, #87ceeb); /* Gradasi lebih terang saat hover */
+    transform: scale(1.05); /* Membesarkan sedikit saat hover */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Tambahkan bayangan lebih besar saat hover */
 }

@@ -13,8 +13,8 @@ include('../koneksi.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../style.css">
+        <title>Dashboard Admin</title>
 </head>
 <body>
 
@@ -41,6 +41,9 @@ include('../koneksi.php');
         </ul>
     </nav>
 </div>
+    <footer>
+        <p>&copy; 2024 Sistem Informasi Akademik. All Rights Reserved.</p>
+    </footer>
 
 </body>
 </html>
